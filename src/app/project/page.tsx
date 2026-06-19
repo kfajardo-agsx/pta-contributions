@@ -1,8 +1,27 @@
-export default function ProjectPage() {
+import { db } from "@/db";
+import { projectContributions } from "@/db/schema";
+import { PROJECT_NOTE } from "@/lib/project";
+import { ProjectGrid } from "./project-grid";
+
+export const dynamic = "force-dynamic";
+
+export default async function ProjectPage() {
+  const rows = await db
+    .select({
+      member: projectContributions.member,
+      amount: projectContributions.amount,
+    })
+    .from(projectContributions);
+
+  const initialAmounts: Record<string, number> = {};
+  for (const row of rows) {
+    initialAmounts[row.member] = row.amount;
+  }
+
   return (
-    <div className="placeholder">
-      <h2>Project Contribution</h2>
-      <p>This sheet isn’t set up yet. Share the structure you want and it’ll be added here.</p>
-    </div>
+    <>
+      <p className="note">{PROJECT_NOTE}</p>
+      <ProjectGrid initialAmounts={initialAmounts} />
+    </>
   );
 }

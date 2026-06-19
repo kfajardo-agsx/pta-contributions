@@ -210,3 +210,99 @@ header h1 {
   color: var(--text);
   font-size: 1.05rem;
 }
+
+/* Project Contribution */
+.summary {
+  display: flex;
+  gap: 2.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-stat {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.summary-stat strong {
+  display: block;
+  font-size: 1.6rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-stat.muted strong {
+  color: var(--muted);
+}
+
+[data-pending] .summary {
+  opacity: 0.85;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem 1rem;
+}
+
+@media (max-width: 760px) {
+  .project-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+}
+
+.project-row:focus-within {
+  border-color: var(--accent);
+}
+
+.project-row .pname {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.project-row .pamount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.project-row .peso-sign {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.project-row input {
+  width: 80px;
+  text-align: right;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.project-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}

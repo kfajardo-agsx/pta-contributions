@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  real,
+  sqliteTable,
+  text,
+  unique,
+} from "drizzle-orm/sqlite-core";
 
 /**
  * Monthly Contribution sheet.
@@ -24,3 +30,20 @@ export const monthlyChecks = sqliteTable(
 );
 
 export type MonthlyCheck = typeof monthlyChecks.$inferSelect;
+
+/**
+ * Project Contribution sheet (e.g. painting the chairs).
+ *
+ * One row per member who has contributed, holding the single amount they gave.
+ * A row is absent (or deleted) when the amount is zero.
+ */
+export const projectContributions = sqliteTable("project_contributions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  member: text("member").notNull().unique(),
+  amount: real("amount").notNull().default(0),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type ProjectContribution = typeof projectContributions.$inferSelect;
