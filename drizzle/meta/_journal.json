@@ -15,6 +15,20 @@
       "when": 1781863957202,
       "tag": "0001_kind_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781864357588,
+      "tag": "0002_perfect_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1781865149395,
+      "tag": "0003_third_moonstone",
+      "breakpoints": true
     }
   ]
 }

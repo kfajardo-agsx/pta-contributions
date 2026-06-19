@@ -3,8 +3,14 @@
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { monthlyChecks, projectContributions } from "@/db/schema";
+import {
+  crMaintenance,
+  monthlyChecks,
+  projectContributions,
+} from "@/db/schema";
 import { MEMBERS, MONTHS } from "@/lib/monthly";
+import { MONTHLY_KEYS, ONE_TIME_KEYS, ONE_TIME_MONTH } from "@/lib/cr";
+import { requireAuth } from "@/lib/auth";
 
 function assertMember(member: string) {
   if (!MEMBERS.includes(member as (typeof MEMBERS)[number])) {
@@ -20,6 +26,7 @@ export async function toggleMonthlyCheck(
   member: string,
   monthIndex: number,
 ): Promise<boolean> {
+  await requireAuth();
   assertMember(member);
   if (!Number.isInteger(monthIndex) || monthIndex < 0 || monthIndex >= MONTHS.length) {
     throw new Error(`Invalid month index: ${monthIndex}`);
@@ -51,6 +58,7 @@ export async function setProjectAmount(
   member: string,
   amount: number,
 ): Promise<number> {
+  await requireAuth();
   assertMember(member);
 
   const value = Number.isFinite(amount) && amount > 0 ? amount : 0;
@@ -73,4 +81,45 @@ export async function setProjectAmount(
 
   revalidatePath("/project");
   return value;
+}
+
+/**
+ * Upsert a CR Maintenance cell (a given item for a given month).
+ */
+export async function setCrMaintenance(
+  monthIndex: number,
+  itemKey: string,
+  checked: boolean,
+  remarks: string,
+): Promise<void> {
+  await requireAuth();
+
+  const isOneTime = ONE_TIME_KEYS.includes(itemKey);
+  const isMonthly = MONTHLY_KEYS.includes(itemKey);
+  if (!isOneTime && !isMonthly) {
+    throw new Error(`Unknown CR item: ${itemKey}`);
+  }
+  if (isOneTime) {
+    if (monthIndex !== ONE_TIME_MONTH) {
+      throw new Error(`One-time item must use month ${ONE_TIME_MONTH}`);
+    }
+  } else if (
+    !Number.isInteger(monthIndex) ||
+    monthIndex < 0 ||
+    monthIndex >= MONTHS.length
+  ) {
+    throw new Error(`Invalid month index: ${monthIndex}`);
+  }
+
+  const trimmed = remarks.trim();
+
+  await db
+    .insert(crMaintenance)
+    .values({ monthIndex, itemKey, checked, remarks: trimmed })
+    .onConflictDoUpdate({
+      target: [crMaintenance.monthIndex, crMaintenance.itemKey],
+      set: { checked, remarks: trimmed, updatedAt: sql`(datetime('now'))` },
+    });
+
+  revalidatePath("/cr-maintenance");
 }

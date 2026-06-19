@@ -6,8 +6,10 @@ import { MEMBERS, peso } from "@/lib/monthly";
 
 export function ProjectGrid({
   initialAmounts,
+  canEdit,
 }: {
   initialAmounts: Record<string, number>;
+  canEdit: boolean;
 }) {
   const [amounts, setAmounts] = useState<Record<string, number>>(
     () => ({ ...initialAmounts }),
@@ -23,6 +25,7 @@ export function ProjectGrid({
   }
 
   function onCommit(member: string) {
+    if (!canEdit) return;
     const value = amounts[member] || 0;
     startTransition(async () => {
       const stored = await setProjectAmount(member, value);
@@ -58,6 +61,7 @@ export function ProjectGrid({
                 value={amounts[member] ? String(amounts[member]) : ""}
                 onChange={(e) => onChange(member, e.target.value)}
                 onBlur={() => onCommit(member)}
+                disabled={!canEdit}
               />
             </span>
           </label>

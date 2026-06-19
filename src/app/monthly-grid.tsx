@@ -10,7 +10,13 @@ import {
   peso,
 } from "@/lib/monthly";
 
-export function MonthlyGrid({ initialChecked }: { initialChecked: string[] }) {
+export function MonthlyGrid({
+  initialChecked,
+  canEdit,
+}: {
+  initialChecked: string[];
+  canEdit: boolean;
+}) {
   const [checked, setChecked] = useState(() => new Set(initialChecked));
   const [optimisticChecked, applyOptimistic] = useOptimistic(
     checked,
@@ -24,6 +30,7 @@ export function MonthlyGrid({ initialChecked }: { initialChecked: string[] }) {
   const [isPending, startTransition] = useTransition();
 
   function toggle(member: string, monthIndex: number) {
+    if (!canEdit) return;
     const key = cellKey(member, monthIndex);
     startTransition(async () => {
       applyOptimistic(key);
@@ -84,6 +91,7 @@ export function MonthlyGrid({ initialChecked }: { initialChecked: string[] }) {
                         aria-label={`${member}, ${month}`}
                         className={isChecked ? "check on" : "check"}
                         onClick={() => toggle(member, m)}
+                        disabled={!canEdit}
                       >
                         {isChecked ? "✓" : ""}
                       </button>

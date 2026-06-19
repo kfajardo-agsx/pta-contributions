@@ -3,14 +3,33 @@
 A small Next.js app of Parent-Teacher Association contribution sheets.
 Built with the App Router, Drizzle ORM, and libSQL (SQLite).
 
+## Editing & login
+
+The app is **view-only** by default — anyone can read the sheets. Making changes
+requires logging in via the **Log in** button (top right), which opens a modal.
+
+Credentials live in the `users` table in the same database (hashed, never
+plaintext) and are seeded from env vars:
+
+```bash
+npm run db:seed   # upserts APP_USERNAME / APP_PASSWORD into the users table
+```
+
+Editing is enforced server-side: every save action rejects unauthenticated
+callers, and the inputs render disabled until you log in.
+
 ## Tabs
 
 - **Monthly Contribution** — a grid of the member roster (alphabetical) × 10
   months from June. Each ticked cell is a ₱50 payment ("CR Upkeep — labor for
   maintenance, and water jugs in the classroom"). Per-member, per-month, and
   grand totals update live as cells are ticked.
-- **Project Contribution** — placeholder, structure TBD.
-- **CR Maintenance** — placeholder, structure TBD.
+- **Project Contribution** — "for painting the chairs": the same roster with one
+  amount field each, in a responsive 3-column grid, with a live total on top.
+- **CR Maintenance** — one-time purchases (Water containers, Doorknob/Padlock)
+  at the top, then a box per month (June→March) for the cleaning materials
+  (Muriatic Acid, Rags, Tissues, Toilet deodorizer). Each item has a checkbox
+  and a remarks field.
 
 The roster, month list, and ₱50 rate live in
 [`src/lib/monthly.ts`](src/lib/monthly.ts).

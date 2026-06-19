@@ -47,3 +47,43 @@ export const projectContributions = sqliteTable("project_contributions", {
 });
 
 export type ProjectContribution = typeof projectContributions.$inferSelect;
+
+/**
+ * CR Maintenance sheet.
+ *
+ * One row per (month, item) cell: whether the item was handled that month and
+ * any free-text remarks. `monthIndex` is 0-based from June (0 = Jun … 9 = Mar).
+ */
+export const crMaintenance = sqliteTable(
+  "cr_maintenance",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    monthIndex: integer("month_index").notNull(),
+    itemKey: text("item_key").notNull(),
+    checked: integer("checked", { mode: "boolean" }).notNull().default(false),
+    remarks: text("remarks").notNull().default(""),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(datetime('now'))`),
+  },
+  (t) => ({
+    monthItem: unique("month_item").on(t.monthIndex, t.itemKey),
+  }),
+);
+
+export type CrMaintenance = typeof crMaintenance.$inferSelect;
+
+/**
+ * Edit credentials. Stored in the same database (seeded from env via the seed
+ * script). Passwords are kept as an HMAC hash, never plaintext.
+ */
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type User = typeof users.$inferSelect;
