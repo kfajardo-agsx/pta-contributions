@@ -8,12 +8,9 @@ Built with the App Router, Drizzle ORM, and libSQL (SQLite).
 The app is **view-only** by default — anyone can read the sheets. Making changes
 requires logging in via the **Log in** button (top right), which opens a modal.
 
-Credentials live in the `users` table in the same database (hashed, never
-plaintext) and are seeded from env vars:
-
-```bash
-npm run db:seed   # upserts APP_USERNAME / APP_PASSWORD into the users table
-```
+Credentials live in environment variables only (`APP_USERNAME`, `APP_PASSWORD`,
+`AUTH_SECRET`) — not in the database. Login compares against them and sets a
+signed, httpOnly session cookie.
 
 Editing is enforced server-side: every save action rejects unauthenticated
 callers, and the inputs render disabled until you log in.

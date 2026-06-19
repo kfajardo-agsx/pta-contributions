@@ -72,18 +72,3 @@ export const crMaintenance = sqliteTable(
 );
 
 export type CrMaintenance = typeof crMaintenance.$inferSelect;
-
-/**
- * Edit credentials. Stored in the same database (seeded from env via the seed
- * script). Passwords are kept as an HMAC hash, never plaintext.
- */
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  username: text("username").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  createdAt: text("created_at")
-    .notNull()
-    .default(sql`(datetime('now'))`),
-});
-
-export type User = typeof users.$inferSelect;

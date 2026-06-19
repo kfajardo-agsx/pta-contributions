@@ -1,25 +1,24 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { db } from "@/db";
-import { users } from "@/db/schema";
 
 const COOKIE = "pta_auth";
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-function secret(): string {
-  return process.env.AUTH_SECRET ?? "dev-insecure-secret";
+function creds() {
+  return {
+    username: process.env.APP_USERNAME ?? "admin",
+    password: process.env.APP_PASSWORD ?? "changeme",
+    secret: process.env.AUTH_SECRET ?? "dev-insecure-secret",
+  };
 }
 
-/** Password hash stored in the DB. Keep in sync with scripts/seed.mjs. */
-export function hashPassword(password: string): string {
-  return createHmac("sha256", secret()).update(password).digest("hex");
-}
-
-/** Opaque session signature bound to the user's current password hash. */
-function sessionSig(userId: number, passwordHash: string): string {
-  return createHmac("sha256", secret())
-    .update(`${userId}:${passwordHash}`)
+// An opaque token derived from the credentials. Storing this (not the password)
+// in the cookie means a stolen cookie can't reveal the password, and changing
+// any credential invalidates existing sessions.
+function expectedToken() {
+  const { username, password, secret } = creds();
+  return createHmac("sha256", secret)
+    .update(`${username}:${password}`)
     .digest("hex");
 }
 
@@ -30,18 +29,9 @@ function safeEqual(a: string, b: string): boolean {
 
 export async function isAuthed(): Promise<boolean> {
   const store = await cookies();
-  const raw = store.get(COOKIE)?.value;
-  if (!raw) return false;
-
-  const [idStr, sig] = raw.split(".");
-  const id = Number(idStr);
-  if (!Number.isInteger(id) || !sig) return false;
-
-  const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
-  const user = rows[0];
-  if (!user) return false;
-
-  return safeEqual(sig, sessionSig(user.id, user.passwordHash));
+  const value = store.get(COOKIE)?.value;
+  if (!value) return false;
+  return safeEqual(value, expectedToken());
 }
 
 /** Throws when the caller isn't logged in. Used to gate mutating actions. */
@@ -51,22 +41,16 @@ export async function requireAuth(): Promise<void> {
   }
 }
 
-/** Validates credentials against the DB and sets the session cookie. */
+/** Validates credentials (from env) and sets the session cookie. */
 export async function login(
   username: string,
   password: string,
 ): Promise<boolean> {
-  const rows = await db
-    .select()
-    .from(users)
-    .where(eq(users.username, username))
-    .limit(1);
-  const user = rows[0];
-  if (!user) return false;
-  if (!safeEqual(user.passwordHash, hashPassword(password))) return false;
+  const c = creds();
+  if (username !== c.username || password !== c.password) return false;
 
   const store = await cookies();
-  store.set(COOKIE, `${user.id}.${sessionSig(user.id, user.passwordHash)}`, {
+  store.set(COOKIE, expectedToken(), {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
