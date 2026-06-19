@@ -1,0 +1,212 @@
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --border: #e3e6ea;
+  --text: #1b1f24;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-soft: #eff4ff;
+  --on: #16a34a;
+  --on-soft: #e9f8ef;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+header h1 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* Notes / placeholders */
+.note {
+  background: var(--accent-soft);
+  border: 1px solid #d6e2ff;
+  color: #1e3a8a;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.placeholder {
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.placeholder h2 {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+/* Sheet */
+.sheet-wrap {
+  overflow-x: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: opacity 0.12s ease;
+}
+
+.sheet-wrap[data-pending] {
+  opacity: 0.75;
+}
+
+.sheet {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.sheet th,
+.sheet td {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sheet thead th {
+  position: sticky;
+  top: 0;
+  background: #f9fafb;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.sheet .name-col {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: var(--panel);
+  font-weight: 600;
+  z-index: 1;
+}
+
+.sheet thead .name-col {
+  z-index: 2;
+}
+
+.month-col {
+  min-width: 48px;
+}
+
+.total-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  min-width: 72px;
+}
+
+.check-cell {
+  padding: 0.2rem;
+}
+
+.check {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: transparent;
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease;
+}
+
+.check:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.check.on {
+  background: var(--on-soft);
+  border-color: var(--on);
+  color: var(--on);
+  font-weight: 700;
+}
+
+.sheet tfoot td,
+.sheet tfoot th {
+  background: #f9fafb;
+  font-weight: 700;
+  color: var(--text);
+  border-top: 2px solid var(--border);
+}
+
+.sheet tfoot .grand {
+  color: var(--on);
+}
+
+.grand-total {
+  padding: 0.9rem 1rem;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+.grand-total strong {
+  color: var(--text);
+  font-size: 1.05rem;
+}
