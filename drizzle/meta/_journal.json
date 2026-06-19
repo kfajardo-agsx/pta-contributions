@@ -8,6 +8,13 @@
       "when": 1781865834327,
       "tag": "0000_freezing_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1781875990410,
+      "tag": "0001_motionless_night_thrasher",
+      "breakpoints": true
     }
   ]
 }

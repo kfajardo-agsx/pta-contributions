@@ -72,3 +72,24 @@ export const crMaintenance = sqliteTable(
 );
 
 export type CrMaintenance = typeof crMaintenance.$inferSelect;
+
+/**
+ * Monthly cleaning-supplies contributions log.
+ *
+ * Each row is one contribution for a month (0 = Jun … 9 = Mar): either a cash
+ * amount (`value`) or a donated item (`itemName`). `contributor` is who gave it.
+ */
+export const cleaningContributions = sqliteTable("cleaning_contributions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  monthIndex: integer("month_index").notNull(),
+  type: text("type", { enum: ["cash", "item"] }).notNull(),
+  itemName: text("item_name"),
+  value: real("value"),
+  contributor: text("contributor").notNull(),
+  remarks: text("remarks").notNull().default(""),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type CleaningContribution = typeof cleaningContributions.$inferSelect;

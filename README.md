@@ -23,10 +23,11 @@ callers, and the inputs render disabled until you log in.
   grand totals update live as cells are ticked.
 - **Project Contribution** — "for painting the chairs": the same roster with one
   amount field each, in a responsive 3-column grid, with a live total on top.
-- **CR Maintenance** — one-time purchases (Water containers, Doorknob/Padlock)
-  at the top, then a box per month (June→March) for the cleaning materials
-  (Muriatic Acid, Rags, Tissues, Toilet deodorizer). Each item has a checkbox
-  and a remarks field.
+- **Other Donations** — one-time purchases (Water containers & Doorknob/Padlock
+  for the CR, TV installation labor, TV wall bracket) with a checkbox + remarks
+  each; then **monthly cleaning-supplies contributions**: month sub-tabs
+  (June→March, defaulting to the current month) where you log cash or item
+  donations via an Add Contribution modal, with a running cash total per month.
 
 The roster, month list, and ₱50 rate live in
 [`src/lib/monthly.ts`](src/lib/monthly.ts).
