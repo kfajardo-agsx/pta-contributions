@@ -1,33 +1,58 @@
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { cleaningContributions, crMaintenance } from "@/db/schema";
+import {
+  cleaningContributions,
+  crMaintenance,
+  oneTimePurchases,
+} from "@/db/schema";
 import { isAuthed } from "@/lib/auth";
-import { crKey, currentMonthIndex } from "@/lib/cr";
-import { CrGrid } from "./cr-grid";
+import { ONE_TIME_ITEMS, ONE_TIME_MONTH, currentMonthIndex } from "@/lib/cr";
+import { OneTimePurchases } from "./one-time-purchases";
 import { CleaningLog, type Contribution } from "./cleaning-log";
 
 export const dynamic = "force-dynamic";
 
-export default async function CrMaintenancePage() {
-  const [oneTimeRows, contribRows, canEdit] = await Promise.all([
+// One-time purchases used to be a fixed code list with checkbox/remarks stored
+// in cr_maintenance. They now live in their own editable table. Seed the
+// defaults once, carrying over any checkbox/remarks already set.
+async function ensureOneTimeSeeded() {
+  const existing = await db
+    .select({ id: oneTimePurchases.id })
+    .from(oneTimePurchases)
+    .limit(1);
+  if (existing.length > 0) return;
+
+  const old = await db
+    .select()
+    .from(crMaintenance)
+    .where(eq(crMaintenance.monthIndex, ONE_TIME_MONTH));
+  const byKey = new Map(old.map((r) => [r.itemKey, r]));
+
+  await db.insert(oneTimePurchases).values(
+    ONE_TIME_ITEMS.map((item) => ({
+      label: item.label,
+      checked: byKey.get(item.key)?.checked ?? false,
+      remarks: byKey.get(item.key)?.remarks ?? "",
+    })),
+  );
+}
+
+export default async function OtherDonationsPage() {
+  await ensureOneTimeSeeded();
+
+  const [items, contribRows, canEdit] = await Promise.all([
     db
       .select({
-        monthIndex: crMaintenance.monthIndex,
-        itemKey: crMaintenance.itemKey,
-        checked: crMaintenance.checked,
-        remarks: crMaintenance.remarks,
+        id: oneTimePurchases.id,
+        label: oneTimePurchases.label,
+        checked: oneTimePurchases.checked,
+        remarks: oneTimePurchases.remarks,
       })
-      .from(crMaintenance),
+      .from(oneTimePurchases)
+      .orderBy(asc(oneTimePurchases.id)),
     db.select().from(cleaningContributions),
     isAuthed(),
   ]);
-
-  const initial: Record<string, { checked: boolean; remarks: string }> = {};
-  for (const row of oneTimeRows) {
-    initial[crKey(row.monthIndex, row.itemKey)] = {
-      checked: row.checked,
-      remarks: row.remarks,
-    };
-  }
 
   const contributions: Contribution[] = contribRows
     .slice()
@@ -48,7 +73,7 @@ export default async function CrMaintenancePage() {
         One-time purchases plus other contributions for CR and Classroom
         Maintenance.
       </p>
-      <CrGrid initial={initial} canEdit={canEdit} />
+      <OneTimePurchases items={items} canEdit={canEdit} />
       <CleaningLog
         contributions={contributions}
         canEdit={canEdit}

@@ -74,6 +74,26 @@ export const crMaintenance = sqliteTable(
 export type CrMaintenance = typeof crMaintenance.$inferSelect;
 
 /**
+ * One-time purchases for CR / classroom maintenance. Each row is a line item
+ * with a checkbox (bought?) and remarks. Rows are user-editable: an
+ * authenticated user can add or remove entries.
+ */
+export const oneTimePurchases = sqliteTable("one_time_purchases", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  label: text("label").notNull(),
+  checked: integer("checked", { mode: "boolean" }).notNull().default(false),
+  remarks: text("remarks").notNull().default(""),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`),
+});
+
+export type OneTimePurchase = typeof oneTimePurchases.$inferSelect;
+
+/**
  * Monthly cleaning-supplies contributions log.
  *
  * Each row is one contribution for a month (0 = Jun … 9 = Mar): either a cash

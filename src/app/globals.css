@@ -462,7 +462,36 @@ input:disabled {
 /* CR Maintenance */
 .cr-onetime {
   margin-bottom: 1.5rem;
-  max-width: 520px;
+  max-width: 560px;
+}
+
+.onetime-add {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--border);
+}
+
+.onetime-add input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.onetime-add input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.onetime-add .btn-ghost {
+  white-space: nowrap;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
 }
 
 .cr-section-label {

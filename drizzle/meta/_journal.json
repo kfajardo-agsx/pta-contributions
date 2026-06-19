@@ -15,6 +15,13 @@
       "when": 1781875990410,
       "tag": "0001_motionless_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781879047345,
+      "tag": "0002_foamy_silver_surfer",
+      "breakpoints": true
     }
   ]
 }

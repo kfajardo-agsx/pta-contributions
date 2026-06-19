@@ -5,12 +5,11 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import {
   cleaningContributions,
-  crMaintenance,
   monthlyChecks,
+  oneTimePurchases,
   projectContributions,
 } from "@/db/schema";
 import { MEMBERS, MONTHS } from "@/lib/monthly";
-import { ONE_TIME_KEYS, ONE_TIME_MONTH } from "@/lib/cr";
 import { isAuthed, requireAuth } from "@/lib/auth";
 
 function assertMember(member: string) {
@@ -84,34 +83,63 @@ export async function setProjectAmount(
   return value;
 }
 
-/**
- * Upsert a CR Maintenance cell (a given item for a given month).
- */
-export async function setCrMaintenance(
-  monthIndex: number,
-  itemKey: string,
+export type OneTimePurchaseRow = {
+  id: number;
+  label: string;
+  checked: boolean;
+  remarks: string;
+};
+
+/** Add a new one-time purchase line item. */
+export async function addOneTimePurchase(
+  label: string,
+): Promise<OneTimePurchaseRow | { error: string }> {
+  if (!(await isAuthed())) return { error: "Please log in to add entries." };
+
+  const trimmed = label.trim();
+  if (!trimmed) return { error: "Name is required." };
+
+  const [row] = await db
+    .insert(oneTimePurchases)
+    .values({ label: trimmed })
+    .returning();
+
+  revalidatePath("/other-donations");
+  return {
+    id: row.id,
+    label: row.label,
+    checked: row.checked,
+    remarks: row.remarks,
+  };
+}
+
+export async function setOneTimePurchaseChecked(
+  id: number,
   checked: boolean,
+): Promise<void> {
+  await requireAuth();
+  await db
+    .update(oneTimePurchases)
+    .set({ checked, updatedAt: sql`(datetime('now'))` })
+    .where(eq(oneTimePurchases.id, id));
+  revalidatePath("/other-donations");
+}
+
+export async function setOneTimePurchaseRemarks(
+  id: number,
   remarks: string,
 ): Promise<void> {
   await requireAuth();
-
-  if (!ONE_TIME_KEYS.includes(itemKey)) {
-    throw new Error(`Unknown CR item: ${itemKey}`);
-  }
-  if (monthIndex !== ONE_TIME_MONTH) {
-    throw new Error(`One-time item must use month ${ONE_TIME_MONTH}`);
-  }
-
-  const trimmed = remarks.trim();
-
   await db
-    .insert(crMaintenance)
-    .values({ monthIndex, itemKey, checked, remarks: trimmed })
-    .onConflictDoUpdate({
-      target: [crMaintenance.monthIndex, crMaintenance.itemKey],
-      set: { checked, remarks: trimmed, updatedAt: sql`(datetime('now'))` },
-    });
+    .update(oneTimePurchases)
+    .set({ remarks: remarks.trim(), updatedAt: sql`(datetime('now'))` })
+    .where(eq(oneTimePurchases.id, id));
+  revalidatePath("/other-donations");
+}
 
+export async function deleteOneTimePurchase(id: number): Promise<void> {
+  await requireAuth();
+  await db.delete(oneTimePurchases).where(eq(oneTimePurchases.id, id));
   revalidatePath("/other-donations");
 }
 
